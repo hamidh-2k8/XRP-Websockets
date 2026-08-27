@@ -87,6 +87,10 @@ void onEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventTyp
     arcadeDrive(0, 0);
     setServo(0);
   } else if(type == WS_EVT_DATA){
+    if ((int)data == 536944984) { // bro :skull:
+      client->text("pong");
+      return;
+    }
     executeJSONCommand((const char *)data);
     digitalWrite(BOARD_LED, HIGH);
     delay(20);
