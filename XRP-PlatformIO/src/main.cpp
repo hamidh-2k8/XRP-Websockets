@@ -4,6 +4,7 @@
 #include <ESPAsyncWebServer.h>
 #include <ArduinoJson.h>
 #include <OneButton.h>
+#include <ArduinoMDNS.h>
 
 #if __has_include(<secrets.h>)
 #   include <secrets.h>
@@ -14,6 +15,8 @@
 OneButton userbutton;
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws"); // access at ws://[esp ip]/ws
+WiFiUDP udp;
+MDNS mdns(udp);
 
 const char* ssid = WIFI_SSID;
 const char* password = WIFI_PASSWORD;
@@ -118,6 +121,13 @@ void setup(){
 
   Serial.println("CONNECTED!!!");
 
+  if (mdns.begin(WiFi.localIP(), MDNS_HOSTNAME)) {
+    Serial.println("mDNS Registered.");
+    mdns.addServiceRecord("XRP Websocket Control._websocket", 80, MDNSServiceTCP);
+  } else {
+    Serial.println("mDNS Error.");
+  }
+
   analogWriteFreq(100);
   analogWriteRange(255);
 
@@ -138,6 +148,7 @@ void setup(){
 
 void loop(){
 
+  mdns.run();
   userbutton.tick();
   if (WiFi.status() != WL_CONNECTED) {
     Serial.println("WiFi disconnected, attempting to reconnect...");
